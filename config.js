@@ -3,7 +3,7 @@ const config = {
     owner: 'Hong-JL',
     repo: 'jifenbang',
     path: '积分数据.csv',
-    token: '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',
+    token: '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',
     branch: 'main'
 };
 
