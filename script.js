@@ -161,11 +161,50 @@ async function saveToGitHub(sha) {
 
 // 修改初始化函数
 async function initData() {
-    const savedData = localStorage.getItem('classPoints');
-    if (savedData) {
-        appData = JSON.parse(savedData);
-        renderAll();
-        return;
+    try {
+        // 首先尝试从GitHub加载数据
+        const response = await fetch(`https://api.github.com/repos/${config.owner}/${config.repo}/contents/${config.path}`, {
+            headers: {
+                'Authorization': `token ${config.token}`,
+                'Accept': 'application/vnd.github.v3+json'
+            }
+        });
+        
+        if (!response.ok) throw new Error('文件不存在');
+        
+        const data = await response.json();
+        const content = atob(data.content);
+        currentSha = data.sha; // 保存sha用于更新文件
+        
+        const rows = content.split('\n')
+            .map(row => row.trim())
+            .filter(row => row)
+            .slice(1); // 跳过标题行
+        
+        const parsedData = rows.map(row => {
+            const [name, current, total] = row.split(',').map(item => item.trim());
+            return {
+                name,
+                current: parseInt(current) || 0,
+                total: parseInt(total) || 0,
+                history: []
+            };
+        });
+
+        if (parsedData.length > 0) {
+            appData.students = parsedData;
+            renderAll();
+            return;
+        }
+    } catch (error) {
+        console.error('从GitHub加载数据失败:', error);
+        // 如果GitHub加载失败，尝试读取localStorage
+        const savedData = localStorage.getItem('classPoints');
+        if (savedData) {
+            appData = JSON.parse(savedData);
+            renderAll();
+            return;
+        }
     }
     
     // 如果没有数据，创建空的学生列表
@@ -174,9 +213,46 @@ async function initData() {
 }
 
 // 修改保存数据函数
+let currentSha = null;
 async function saveData() {
-    // 本地测试时只使用localStorage
-    localStorage.setItem('classPoints', JSON.stringify(appData));
+    try {
+        // 保存到GitHub
+        const csvContent = [
+            ['姓名', '当日积分', '总积分'],
+            ...appData.students.map(s => [s.name, s.current, s.total])
+        ].map(row => row.join(',')).join('\n');
+
+        const content = btoa(unescape(encodeURIComponent(csvContent))); // 支持中文
+
+        const body = {
+            message: `更新积分数据 ${new Date().toLocaleString()}`,
+            content,
+            branch: config.branch
+        };
+        
+        if (currentSha) body.sha = currentSha;
+
+        const response = await fetch(`https://api.github.com/repos/${config.owner}/${config.repo}/contents/${config.path}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `token ${config.token}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/vnd.github.v3+json'
+            },
+            body: JSON.stringify(body)
+        });
+
+        if (!response.ok) throw new Error('保存失败');
+        
+        const result = await response.json();
+        currentSha = result.content.sha;
+        
+        // 同时保存到localStorage作为备份
+        localStorage.setItem('classPoints', JSON.stringify(appData));
+    } catch (error) {
+        console.error('保存到GitHub失败:', error);
+        alert('保存到GitHub失败，已备份到本地存储');
+    }
 }
 
 // 全选/取消全选
@@ -302,15 +378,37 @@ function showLoading(show) {
 
 // 页面加载时初始化
 window.onload = async function() {
-    await initData();
-    if (appData.students.length === 0) {
-        document.getElementById('fileInput').click();
+    if (await checkConfig()) {
+        await initData();
+        renderAll();
     }
-    renderAll();
 };
 
 // 修改页面关闭时保存
-window.addEventListener('beforeunload', function() {
+window.addEventListener('beforeunload', function(e) {
+    e.preventDefault();
+    // 使用同步XHR确保数据保存
+    const csvContent = [
+        ['姓名', '当日积分', '总积分'],
+        ...appData.students.map(s => [s.name, s.current, s.total])
+    ].map(row => row.join(',')).join('\n');
+
+    const content = btoa(unescape(encodeURIComponent(csvContent)));
+    const body = {
+        message: `更新积分数据 ${new Date().toLocaleString()}`,
+        content,
+        branch: config.branch
+    };
+    if (currentSha) body.sha = currentSha;
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('PUT', `https://api.github.com/repos/${config.owner}/${config.repo}/contents/${config.path}`, false);
+    xhr.setRequestHeader('Authorization', `token ${config.token}`);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.setRequestHeader('Accept', 'application/vnd.github.v3+json');
+    xhr.send(JSON.stringify(body));
+
+    // 同时保存到localStorage
     localStorage.setItem('classPoints', JSON.stringify(appData));
 });
 
