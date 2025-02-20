@@ -417,12 +417,25 @@ async function checkConfig() {
     try {
         const response = await fetch('config.js');
         if (!response.ok) {
-            alert('请创建config.js文件并填入你的GitHub配置！\n可以复制config.example.js为config.js，然后修改里面的配置信息。');
+            document.querySelector('.setup-guide').style.display = 'block';
+            return false;
+        }
+        // 测试token是否有效
+        const testResponse = await fetch(`https://api.github.com/repos/${config.owner}/${config.repo}`, {
+            headers: {
+                'Authorization': `token ${config.token}`,
+                'Accept': 'application/vnd.github.v3+json'
+            }
+        });
+        if (!testResponse.ok) {
+            alert('GitHub Token无效，请检查配置！');
+            document.querySelector('.setup-guide').style.display = 'block';
             return false;
         }
         return true;
     } catch (error) {
         alert('无法加载配置文件！');
+        document.querySelector('.setup-guide').style.display = 'block';
         return false;
     }
 } 

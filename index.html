@@ -7,6 +7,24 @@
     <link href="styles.css" rel="stylesheet">
 </head>
 <body>
+    <div class="setup-guide" style="display: none;">
+        <h3>首次使用配置说明</h3>
+        <ol>
+            <li>复制 config.example.js 为 config.js</li>
+            <li>在GitHub中创建Personal Access Token:
+                <ul>
+                    <li>访问 GitHub → Settings → Developer settings → Personal access tokens</li>
+                    <li>点击 Generate new token (classic)</li>
+                    <li>选择 repo 权限</li>
+                    <li>生成并复制token</li>
+                </ul>
+            </li>
+            <li>将token粘贴到config.js中</li>
+            <li>刷新页面即可使用</li>
+        </ol>
+        <button onclick="this.parentElement.style.display='none'">我知道了</button>
+    </div>
+
     <div class="global-controls">
         <h2 class="center-text">✨ 魔法积分控制台 ✨</h2>
         <div class="controls-container">
