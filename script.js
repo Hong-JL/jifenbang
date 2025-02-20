@@ -1,3 +1,5 @@
+import config from './config.js';
+
 let appData = {
     currentDate: new Date().toLocaleDateString('zh-CN'),
     students: [],
@@ -71,18 +73,10 @@ function importFromCSV(file) {
     reader.readAsText(file);
 }
 
-// GitHub配置
-const config = {
-    owner: '你的GitHub用户名',
-    repo: '你的仓库名',
-    path: '积分数据.csv',
-    token: '你的GitHub Token',
-    branch: 'main'  // 或者 'master'，取决于你的默认分支
-};
-
 // 从GitHub加载数据
 async function loadFromGitHub() {
     try {
+        console.log('正在从GitHub加载数据...');
         const response = await fetch(`https://api.github.com/repos/${config.owner}/${config.repo}/contents/${config.path}`, {
             headers: {
                 'Authorization': `token ${config.token}`,
@@ -90,7 +84,12 @@ async function loadFromGitHub() {
             }
         });
         
-        if (!response.ok) throw new Error('文件不存在');
+        console.log('GitHub API响应状态:', response.status);
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('GitHub API错误:', errorText);
+            throw new Error('文件不存在');
+        }
         
         const data = await response.json();
         const content = atob(data.content);
@@ -116,7 +115,7 @@ async function loadFromGitHub() {
             return sha;
         }
     } catch (error) {
-        console.log('无法从GitHub加载数据:', error);
+        console.error('从GitHub加载数据失败:', error);
         return null;
     }
 }

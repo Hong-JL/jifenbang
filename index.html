@@ -1,10 +1,14 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
-    <title>趣味积分榜</title>
     <meta charset="UTF-8">
-    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="styles.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>魔法积分榜</title>
+    <!-- 确保所有文件都使用UTF-8编码 -->
+    <link rel="stylesheet" href="styles.css" charset="utf-8">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script type="module" src="config.js" charset="utf-8"></script>
+    <script type="module" src="script.js" charset="utf-8"></script>
 </head>
 <body>
     <div class="setup-guide" style="display: none;">
@@ -83,9 +87,5 @@
             <div id="totalRank"></div>
         </div>
     </div>
-
-    <!-- 暂时注释掉模块导入 -->
-    <!-- <script type="module" src="config.js"></script> -->
-    <script src="script.js"></script>
 </body>
 </html>
