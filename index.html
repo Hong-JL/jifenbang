@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>趣味积分榜</title>
+    <meta charset="UTF-8">
+    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+</head>
+<body>
+    <div class="global-controls">
+        <h2 class="center-text">✨ 魔法积分控制台 ✨</h2>
+        <div class="controls-container">
+            <input type="number" id="globalPoints" value="1" min="1">
+            <button class="btn-global" onclick="batchAdd()">
+                <i class="fas fa-magic"></i> 给选中同学加分
+            </button>
+            <button class="btn-global" onclick="batchSubtract()">
+                <i class="fas fa-hat-wizard"></i> 给选中同学减分
+            </button>
+            <button class="btn-global" onclick="toggleSelectAll()">
+                <i class="fas fa-check-double"></i> 全选/取消
+            </button>
+            <button class="btn-danger" onclick="clearAllScores()">
+                <i class="fas fa-trash-alt"></i> 清空总积分
+            </button>
+            
+            <button class="btn-save" onclick="exportToCSV()">
+                <i class="fas fa-download"></i> 导出数据
+            </button>
+            
+            <label class="btn-save">
+                <i class="fas fa-upload"></i> 导入数据
+                <input type="file" accept=".csv" onchange="importFromCSV(this.files[0])" style="display: none;">
+            </label>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="student-list">
+            <div class="list-header">
+                <h2><i class="fas fa-user-graduate"></i> 同学列表</h2>
+                <div class="icon-legend">
+                    <span class="legend-item">
+                        <i class="fas fa-comment-dots"></i> 课堂表现 (+1分)
+                    </span>
+                    <span class="legend-item">
+                        <i class="fas fa-paint-brush"></i> 任务作品 (+5分)
+                    </span>
+                    <span class="legend-item">
+                        <i class="fas fa-exclamation-triangle"></i> 提醒 (-1分)
+                    </span>
+                </div>
+            </div>
+            <div id="studentsContainer"></div>
+        </div>
+        
+        <div class="ranking-today">
+            <h2><i class="fas fa-trophy" style="color: #FFD700"></i> 今日榜</h2>
+            <p class="date-display">（<span id="currentDate"></span>）</p>
+            <div id="currentRank"></div>
+        </div>
+        
+        <div class="ranking-total">
+            <h2><i class="fas fa-crown" style="color: #FF6F00"></i> 总积分榜</h2>
+            <div id="totalRank"></div>
+        </div>
+    </div>
+
+    <!-- 暂时注释掉模块导入 -->
+    <!-- <script type="module" src="config.js"></script> -->
+    <script src="script.js"></script>
+</body>
+</html>

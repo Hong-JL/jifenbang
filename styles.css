@@ -1,0 +1,303 @@
+:root {
+    --primary-color: #6C9BCF;
+    --secondary-color: #FFD95A;
+    --accent-color: #C27664;
+}
+
+body {
+    font-family: 'Comic Sans MS', cursive;
+    margin: 0;
+    padding: 20px;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.container {
+    display: grid;
+    grid-template-columns: 3fr 1fr 1fr;
+    gap: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.global-controls {
+    text-align: center;
+}
+
+.controls-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.student-list {
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.list-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.icon-legend {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: #666;
+    font-size: 0.9em;
+    background: #f8f9fa;
+    padding: 5px 10px;
+    border-radius: 15px;
+}
+
+#studentsContainer {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
+.student {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s;
+}
+
+.student:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.student-controls {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.student-controls button {
+    transform: scale(0.8);
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 修改按钮颜色 */
+.btn-add.green {
+    background: #28a745 !important;
+    color: white;
+}
+
+.btn-add.blue {
+    background: var(--primary-color) !important;
+    color: white;
+}
+
+.btn-subtract.red {
+    background: #dc3545 !important;
+    color: white;
+}
+
+.btn-add.green:hover {
+    background: #218838;
+}
+
+.btn-danger {
+    background: #dc3545;
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-danger:hover {
+    background: #c82333;
+    transform: scale(1.05);
+}
+
+/* 排行榜样式优化 */
+.ranking-today {
+    background: linear-gradient(145deg, #ffffff, #f8f9fa);
+    border: 2px solid #FFD700;
+}
+
+.ranking-total {
+    background: linear-gradient(145deg, #FFF3E0, #FFE0B2);
+    border: 2px solid #FF6F00;
+}
+
+.ranking-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 15px;
+    margin: 5px 0;
+    border-radius: 8px;
+    white-space: nowrap;
+}
+
+.ranking-item span.name {
+    flex: 1;
+    margin: 0 10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ranking-item span.score {
+    margin-left: auto;
+    font-weight: bold;
+}
+
+.ranking-today .ranking-item {
+    background: rgba(255, 215, 0, 0.1);
+    border-left: 4px solid #FFD700;
+}
+
+.ranking-total .ranking-item {
+    background: rgba(255, 111, 0, 0.1);
+    border-left: 4px solid #FF6F00;
+}
+
+.ranking-item:hover {
+    transform: translateX(5px);
+}
+
+.rank-number {
+    background: var(--accent-color);
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.total-score {
+    margin-left: auto;
+    color: var(--accent-color);
+    font-weight: bold;
+}
+
+button {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.3s;
+    margin: 5px;
+}
+
+.btn-add {
+    background: var(--primary-color);
+    color: white;
+}
+
+.btn-add:hover {
+    background: #5a8abf;
+    transform: scale(1.05);
+}
+
+.btn-subtract {
+    background: var(--accent-color);
+    color: white;
+}
+
+.btn-subtract:hover {
+    background: #b16553;
+    transform: scale(1.05);
+}
+
+.btn-global {
+    background: var(--secondary-color);
+    color: #333;
+}
+
+.btn-global:hover {
+    background: #ffd03b;
+    transform: scale(1.05);
+}
+
+input[type="number"] {
+    padding: 8px;
+    border: 2px solid var(--primary-color);
+    border-radius: 20px;
+    width: 80px;
+    margin: 0 10px;
+}
+
+.student-checkbox {
+    transform: scale(1.2);
+    margin-right: 10px;
+}
+
+.btn-save {
+    background: #28a745;
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-save:hover {
+    background: #218838;
+    transform: scale(1.05);
+}
+
+.rankings {
+    display: contents;
+}
+
+/* 美化排行榜 */
+.ranking-today, .ranking-total {
+    padding: 15px;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    height: fit-content;
+}
+
+.ranking-today {
+    background: linear-gradient(145deg, #ffffff, #f8f9fa);
+    border: 2px solid #FFD700;
+}
+
+.ranking-total {
+    background: linear-gradient(145deg, #FFF3E0, #FFE0B2);
+    border: 2px solid #FF6F00;
+}
+
+/* 在较小屏幕上自动调整列数 */
+@media (max-width: 1200px) {
+    #studentsContainer {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 900px) {
+    #studentsContainer {
+        grid-template-columns: repeat(2, 1fr);
+    }
+} 
