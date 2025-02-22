@@ -9,7 +9,7 @@ window.saveToGitHub = saveToGitHub;
 let appData = {
     currentDate: new Date().toLocaleDateString('zh-CN'),
     students: [],
-    dailyScores: {}
+    dailyScores: {}  // 用于存储每日积分记录
 };
 
 // 添加一个变量跟踪数据是否被修改
@@ -351,4 +351,119 @@ window.addEventListener('beforeunload', function(e) {
 });
 
 // 页面加载完成后初始化
-document.addEventListener('DOMContentLoaded', initData); 
+document.addEventListener('DOMContentLoaded', initData);
+
+// 修改保存函数，添加日期列
+async function saveToLocal() {
+    try {
+        // 获取当前日期作为新列名
+        const today = new Date().toLocaleDateString('zh-CN');
+        
+        // 读取现有的CSV文件以获取历史数据
+        const response = await fetch('积分数据.csv');
+        let existingData = '';
+        let headers = ['姓名', '当日积分', '总积分'];
+        let historicalDates = [];
+        
+        if (response.ok) {
+            existingData = await response.text();
+            const rows = existingData.split('\n').map(row => row.trim());
+            if (rows.length > 0) {
+                // 获取现有的列标题
+                headers = rows[0].split(',').map(h => h.trim());
+                historicalDates = headers.slice(3); // 获取已有的日期列
+            }
+        }
+
+        // 如果今天的日期列还不存在，添加它
+        if (!historicalDates.includes(today)) {
+            headers.push(today);
+        }
+
+        // 准备新的CSV内容
+        const csvRows = [headers];
+        
+        // 添加每个学生的数据
+        appData.students.forEach(student => {
+            const row = [student.name, student.current, student.total];
+            
+            // 添加历史数据
+            historicalDates.forEach(date => {
+                if (date === today) {
+                    row.push(student.current); // 今天的积分
+                } else {
+                    // 从现有数据中查找历史积分
+                    const historicalScore = existingData
+                        .split('\n')
+                        .find(r => r.startsWith(student.name + ','))
+                        ?.split(',')
+                        [headers.indexOf(date)] || '0';
+                    row.push(historicalScore);
+                }
+            });
+            
+            // 如果今天是新的一天，添加今天的积分
+            if (!historicalDates.includes(today)) {
+                row.push(student.current);
+            }
+            
+            csvRows.push(row);
+        });
+
+        const csvContent = csvRows.map(row => row.join(',')).join('\n');
+
+        // 保存到服务器
+        const saveResponse = await fetch('/save', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ content: csvContent })
+        });
+
+        if (saveResponse.ok) {
+            alert('保存成功！');
+        } else {
+            throw new Error('保存失败');
+        }
+    } catch (error) {
+        console.error('保存失败:', error);
+        alert('保存失败，请重试！');
+    }
+}
+
+// 修改加载函数，支持历史数据
+async function loadFromLocal() {
+    try {
+        const response = await fetch('积分数据.csv');
+        if (!response.ok) throw new Error('无法加载文件');
+        
+        const text = await response.text();
+        const rows = text.split('\n')
+            .map(row => row.trim())
+            .filter(row => row);
+        
+        // 获取列标题
+        const headers = rows[0].split(',').map(h => h.trim());
+        
+        // 解析学生数据
+        appData.students = rows.slice(1).map(row => {
+            const columns = row.split(',').map(item => item.trim());
+            return {
+                name: columns[0],
+                current: parseInt(columns[1]) || 0,
+                total: parseInt(columns[2]) || 0
+            };
+        });
+
+        localStorage.setItem('classPoints', JSON.stringify(appData));
+        renderAll();
+    } catch (error) {
+        console.error('加载数据失败:', error);
+        const savedData = localStorage.getItem('classPoints');
+        if (savedData) {
+            appData = JSON.parse(savedData);
+            renderAll();
+        }
+    }
+} 
