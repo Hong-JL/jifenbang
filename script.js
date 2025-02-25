@@ -147,25 +147,39 @@ async function loadFromGitHub() {
         const content = decodeURIComponent(escape(atob(data.content)));
         window.currentSha = data.sha;
         
+        // 获取当前日期
+        const today = new Date().toLocaleDateString('zh-CN');
+        
         // 解析CSV内容
         const rows = content.split('\n')
             .map(row => row.trim())
             .filter(row => row);
         
         const headers = rows[0].split(',');
-        const today = new Date().toLocaleDateString('zh-CN');
         const todayIndex = headers.indexOf(today);
         
         // 更新appData
         appData.students = rows.slice(1).map(row => {
             const cols = row.split(',');
+            let currentPoints = 0;
+            
+            // 如果今天的列存在，使用今天的积分，否则为0
+            if (todayIndex >= 0) {
+                currentPoints = parseInt(cols[todayIndex]) || 0;
+            }
+            
             return {
                 name: cols[0],
-                current: parseInt(cols[todayIndex >= 0 ? todayIndex : 1]) || 0,
-                total: parseInt(cols[2]) || 0
+                current: currentPoints, // 设置当前积分
+                total: parseInt(cols[2]) || 0,
+                history: []
             };
         });
 
+        // 更新当前日期
+        appData.currentDate = today;
+        console.log(`已加载${today}的积分数据`);
+        
         return content;
     } catch (error) {
         console.error('从GitHub加载数据失败:', error);
@@ -275,8 +289,14 @@ async function checkConfig() {
 // 修改保存到GitHub的函数
 async function saveToGitHub() {
     try {
+        showLoading(true);
         // 获取当前日期作为列标题
         const today = new Date().toLocaleDateString('zh-CN');
+        
+        // 确保appData的当前日期是今天
+        if (appData.currentDate !== today) {
+            appData.currentDate = today;
+        }
         
         // 准备CSV内容，包含历史记录
         let csvContent;
@@ -303,7 +323,7 @@ async function saveToGitHub() {
                     headers.push(today);
                     
                     // 更新每个学生的记录
-                    const updatedRows = rows.slice(1).map((row, index) => {
+                    const updatedRows = rows.slice(1).map((row) => {
                         const cols = row.split(',');
                         const student = appData.students.find(s => s.name === cols[0]);
                         return [...cols, student ? student.current : '0'];
@@ -317,10 +337,12 @@ async function saveToGitHub() {
                 } else {
                     // 更新今天的记录
                     const todayIndex = headers.indexOf(today);
-                    const updatedRows = rows.slice(1).map((row, index) => {
+                    const updatedRows = rows.slice(1).map((row) => {
                         const cols = row.split(',');
                         const student = appData.students.find(s => s.name === cols[0]);
-                        cols[todayIndex] = student ? student.current : '0';
+                        if (student) {
+                            cols[todayIndex] = student.current.toString();
+                        }
                         return cols.join(',');
                     });
                     
@@ -331,6 +353,7 @@ async function saveToGitHub() {
                 }
             }
         } catch (error) {
+            console.error('读取现有CSV失败:', error);
             // 如果无法读取现有文件，创建新的CSV
             csvContent = [
                 ['姓名', '当日积分', '总积分', today],
@@ -363,13 +386,16 @@ async function saveToGitHub() {
 
         const result = await saveResponse.json();
         window.currentSha = result.content.sha;
+        dataModified = false;
         
         // 显示保存成功提示
         alert('保存成功！');
+        showLoading(false);
         return true;
     } catch (error) {
         console.error('保存失败:', error);
         alert('保存失败，请检查网络连接和GitHub配置');
+        showLoading(false);
         return false;
     }
 }
